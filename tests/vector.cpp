@@ -136,6 +136,18 @@ TEST(Iterators, End)
 	EXPECT_EQ(vec.begin() + vec.size(), vec.end());
 }
 
+TEST(Iterators, Rbegin)
+{
+	vint vec({ 1, 2, 3, 4 });
+	EXPECT_EQ(4, *vec.rbegin());
+}
+
+TEST(Iterators, Rend)
+{
+	vint vec({ 1, 2, 3, 4 });
+	EXPECT_EQ(1, *(vec.rend() - 1));
+}
+
 TEST(Modifier, PushBack)
 {
 	vint vec;
@@ -169,7 +181,10 @@ TEST(Capacity, Reserve)
 
 TEST(Capacity, ShrinkToFit)
 {
-	// TODO
+	vint vec({ 1, 2, 3, 4 });
+	vec.reserve(100); // TODO change to resize
+	vec.shrink_to_fit();
+	EXPECT_EQ(4, vec.capacity());
 }
 
 TEST(Modifier, Clear)
@@ -178,4 +193,17 @@ TEST(Modifier, Clear)
 	vec.clear();
 
 	EXPECT_EQ(0, vec.size());
+}
+
+TEST(Modifier, PopBack)
+{
+	vint vec({ 1, 2, 3, 4 });
+	int result[3] = { 1, 2, 3 };
+	vec.pop_back();
+
+	EXPECT_EQ(3, vec.size());
+
+	for (int i = 0; i < 3; i++) {
+		EXPECT_EQ(result[i], vec.at(i));
+	}
 }
