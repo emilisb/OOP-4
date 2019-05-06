@@ -12,7 +12,7 @@
 int main(int argc, const char * argv[]) {
     vector<int> numbers(5, 10);
     numbers.push_back(5);
-    
+
     std::cout << numbers.at(0) << std::endl;
     return 0;
 }
