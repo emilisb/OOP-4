@@ -24,9 +24,9 @@ public:
     typedef std::reverse_iterator<iterator> reverse_iterator;
     typedef std::reverse_iterator<const_iterator> const_reverse_iterator;
     
-    vector() : _size(0), _capacity(4) { _data = new T[_capacity]; }
+    vector() : _size(0), _capacity(0) { _data = new T[_capacity]; }
     
-    vector(size_type count, const T& value = T()) : _size(count), _capacity(count*2) {
+    vector(size_type count, const T& value = T()) : _size(count), _capacity(calculateGrowth(count)) {
         _data = new T[_capacity];
         std::fill_n(_data, count, value);
     }
@@ -40,10 +40,10 @@ public:
     
     vector(const vector& other) {
         _size = other.size();
-        _capacity = other._capacity();
+        _capacity = other.capacity();
         _data = new T[_size];
         
-        std::copy(std::begin(other.data()), std::end(other.data()), std::begin(_data));
+        std::copy(other.begin(), other.end(), _data);
     }
     
     // C++11
@@ -60,28 +60,43 @@ public:
     }
     
     ~vector() {
-        delete[] _data;
+		// Make sure our data is not nullptr (used in unit tests to prevent double deconstruction)
+		if (_data != nullptr) {
+			delete[] _data;
+			_data = nullptr;
+		}
     }
     
     vector& operator=(const vector& other) {
-        _size = other.size();
-        _capacity = other._capacity();
-        _data = new T[_size];
-        
-        std::copy(std::begin(other.data()), std::end(other.data()), std::begin(_data));
+		vector(other);
     }
     
     void assign(size_t count, const T& value) {
-        // TODO
+		clear();
+
+		if (count > _capacity) {
+			reallocate(count);
+		}
+
+		for (int i = 0; i < count; i++) {
+			_data[i] = value;
+		}
+
+		_size = count;
     }
     
+	/*
     template<class InputIt>
     void assign(InputIt first, InputIt last) {
         // TODO
     }
+	*/
     
     void push_back(const T& item) {
-        // TODO reallocate
+		if (_size == _capacity) {
+			reallocate(_capacity + 1);
+		}
+
         _data[_size] = item;
         ++_size;
     }
@@ -95,11 +110,7 @@ public:
     }
     
     const_reference at(size_type pos) const {
-        if (pos < _size) {
-            return _data[pos];
-        }
-        
-        throw std::out_of_range("position is out of range");
+		return at(pos);
     }
     
     reference operator[](size_type pos) {
@@ -175,7 +186,7 @@ public:
     }
     
     size_type max_size() const {
-        // TODO validate
+        // TODO verify
         return std::numeric_limits<size_type>::max();
     }
     
@@ -184,8 +195,11 @@ public:
             throw new std::length_error("capacity cannot be larger than max size");
         }
         _capacity = new_cap;
-        // TODO reallocate
     }
+
+	size_type capacity() const {
+		return _capacity;
+	}
     
     // C++11
     void shrink_to_fit() {
@@ -195,7 +209,7 @@ public:
     
     void clear() {
         for (int i = 0; i < _size; i++) {
-            delete _data[i];
+			_data[i].~T();
         }
         
         _size = 0;
@@ -204,6 +218,31 @@ private:
     size_type _size;
     size_type _capacity;
     T* _data;
+
+	size_type calculateGrowth(size_type newSize) const {
+		if (_capacity > max_size() - _capacity / 2) {
+			return newSize;
+		}
+
+		const size_type geometric = _capacity * 1.5;
+
+		if (geometric < newSize) {
+			return newSize;
+		}
+
+		return geometric;
+	}
+
+	void reallocate(size_type minSize) {
+		const size_type newCapacity = calculateGrowth(minSize);
+
+		T* newData = new T[newCapacity];
+		std::copy(_data, _data + _size, newData);
+		delete[] _data;
+		
+		_data = newData;
+		_capacity = newCapacity;
+	}
 };
 
 #endif /* vector_h */
