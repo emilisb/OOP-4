@@ -1,5 +1,5 @@
 #include "gtest/gtest.h"
-#include "../vector.h"
+#include "../src/vector.h"
 
 typedef vector<int> vint;
 
@@ -54,11 +54,11 @@ TEST(Deconstructor, FreeMemory)
     EXPECT_EQ(nullptr, vec.data());
 }
 
-TEST(Operator, EqualToOtherVector)
+TEST(Operator, AssignToOtherVector)
 {
     vint original({ 1, 2, 3, 4 });
-    vint copy = original;
-
+    vint copy;
+    copy = original;
     EXPECT_EQ(4, copy.size());
 
     for (int i = 0; i < 4; i++) {

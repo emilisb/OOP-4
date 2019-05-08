@@ -41,7 +41,7 @@ public:
     vector(const vector& other) {
         _size = other.size();
         _capacity = other.capacity();
-        _data = new T[_size];
+        _data = new T[_capacity];
 
         std::copy(other.begin(), other.end(), _data);
     }
@@ -68,7 +68,13 @@ public:
     }
 
     vector& operator=(const vector& other) {
-        vector(other);
+        _size = other.size();
+        _capacity = other.capacity();
+        printf("other size: %d\n", other.size());
+        _data = new T[_capacity];
+        
+        std::copy(other.begin(), other.end(), _data);
+        return *this;
     }
 
     void assign(size_t count, const T& value) {
