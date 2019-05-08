@@ -53,8 +53,8 @@ public:
 
     vector(std::initializer_list<T> init) {
         _size = init.size();
-        _capacity = _size * 2;
-        _data = new T[_size];
+        _capacity = calculateGrowth(_size);
+        _data = new T[_capacity];
 
         std::copy(init.begin(), init.end(), _data);
     }
