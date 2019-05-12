@@ -1,5 +1,12 @@
 # Custom C++ vector implememtation
 
+### Running benchmark
+- make
+- make run
+
+### Running unit tests (requires Googletest installed)
+- make test
+
 ## Push_back benchmark
 ```
 Benchmark: inserting 10000 elements
