@@ -251,19 +251,46 @@ public:
     }
 
     iterator insert(const_iterator pos, const T& value) {
-        // TODO
+        return insert(pos, 1, value);
     }
 
     iterator insert(const_iterator pos, T&& value) {
-        // TODO
+        auto index = pos - begin();
+
+        if (size() == capacity()) {
+            reallocate(capacity() + 1);
+        }
+
+        iterator it = &_data[index];
+
+        std::move(it, end(), it + 1);
+        *it = std::move(value);
+
+        _size++;
+
+        return it;
     }
 
     iterator insert(const_iterator pos, size_type count, const T& value) {
-        // TODO
+        auto index = pos - begin();
+
+        if (size() == capacity()) {
+            reallocate(capacity() + count);
+        }
+
+        iterator it = &_data[index];
+
+        std::move(it, end(), it + count);
+        for (int i = 0; i < count; i++) {
+            *(it + i) = value;
+        }
+
+        _size += count;
+
+        return it;
     }
 
-    template<class InputIt>
-    iterator insert(const_iterator pos, InputIt first, InputIt last) {
+    iterator insert(const_iterator pos, iterator first, iterator last) {
         // TODO
     }
 

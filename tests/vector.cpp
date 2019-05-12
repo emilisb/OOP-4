@@ -245,6 +245,57 @@ TEST(Modifier, Clear)
     EXPECT_EQ(0, vec.size());
 }
 
+TEST(Modifier, InsertWithValue)
+{
+    int value = 5;
+    vint vec({ 1, 2, 3, 4 });
+    auto it = vec.insert(vec.begin(), value);
+    
+    EXPECT_EQ(5, vec.size());
+    EXPECT_EQ(5, *it);
+    EXPECT_EQ(5, vec.at(0));
+    for (int i = 1; i < 5; i++) {
+        EXPECT_EQ(i, vec.at(i));
+    }
+
+    it = vec.insert(vec.end(), value);
+    EXPECT_EQ(6, vec.size());
+    EXPECT_EQ(5, *it);
+    EXPECT_EQ(5, vec.at(5));
+}
+
+TEST(Modifier, InsertWithValueMove)
+{
+    int value = 5;
+    vint vec({ 1, 2, 3, 4 });
+    auto it = vec.insert(vec.begin(), std::move(value));
+
+    EXPECT_EQ(5, vec.size());
+    EXPECT_EQ(5, *it);
+    EXPECT_EQ(5, vec.at(0));
+    for (int i = 1; i < 5; i++) {
+        EXPECT_EQ(i, vec.at(i));
+    }
+}
+
+TEST(Modifier, InsertWithCount)
+{
+    vint vec({ 1, 2, 3, 4 });
+    auto it = vec.insert(vec.begin(), 3, 5);
+
+    EXPECT_EQ(7, vec.size());
+    EXPECT_EQ(5, *it);
+    
+    EXPECT_EQ(5, vec.at(0));
+    EXPECT_EQ(5, vec.at(1));
+    EXPECT_EQ(5, vec.at(2));
+   
+    EXPECT_EQ(1, vec.at(3));
+    EXPECT_EQ(2, vec.at(4));
+    EXPECT_EQ(3, vec.at(5));
+    EXPECT_EQ(4, vec.at(6));
+}
+
 TEST(Modifier, PopBack)
 {
     vint vec({ 1, 2, 3, 4 });
