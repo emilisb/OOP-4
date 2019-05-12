@@ -248,3 +248,43 @@ TEST(Modifier, PopBack)
         EXPECT_EQ(result[i], vec.at(i));
     }
 }
+
+TEST(Modifier, Resize)
+{
+    vint vec({ 1, 2, 3, 4 });
+    vec.resize(10);
+
+    EXPECT_EQ(10, vec.size());
+    EXPECT_EQ(1, vec.at(0));
+    EXPECT_EQ(2, vec.at(1));
+    EXPECT_EQ(3, vec.at(2));
+    EXPECT_EQ(4, vec.at(3));
+    for (int i = 5; i < 10; i++) {
+        EXPECT_EQ(0, vec.at(i));
+    }
+
+    vec.resize(2);
+    EXPECT_EQ(2, vec.size());
+    EXPECT_EQ(1, vec.at(0));
+    EXPECT_EQ(2, vec.at(1));
+}
+
+TEST(Modifier, ResizeWithValue)
+{
+    vint vec({ 1, 2, 3, 4 });
+    vec.resize(10, 999);
+
+    EXPECT_EQ(10, vec.size());
+    EXPECT_EQ(1, vec.at(0));
+    EXPECT_EQ(2, vec.at(1));
+    EXPECT_EQ(3, vec.at(2));
+    EXPECT_EQ(4, vec.at(3));
+    for (int i = 5; i < 10; i++) {
+        EXPECT_EQ(999, vec.at(i));
+    }
+
+    vec.resize(2);
+    EXPECT_EQ(2, vec.size());
+    EXPECT_EQ(1, vec.at(0));
+    EXPECT_EQ(2, vec.at(1));
+}

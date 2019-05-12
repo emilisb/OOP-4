@@ -308,11 +308,23 @@ public:
     }
 
     void resize(size_type count) {
-        // TODO
+        resize(count, T());
     }
 
-    void resize(size_type count, const_reference value) {
-        // TODO
+    void resize(size_type count, const value_type& value) {
+        if (count > capacity()) {
+            reallocate(count);
+            for (size_type i = size(); i < count; i++) {
+                _data[i] = value;
+            }
+        }
+        else if (count < size()) {
+            for (size_type i = count; i < size(); i++) {
+                _data[i].~T();
+            }
+        }
+
+        _size = count;
     }
 
     void swap(vector& other) {
