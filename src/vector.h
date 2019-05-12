@@ -9,13 +9,16 @@
 #ifndef vector_h
 #define vector_h
 
+#include <memory>
 #include <stdexcept>
 #include <iterator>
 #include <limits>
 
-template<class T>
+template<class T, class Allocator = std::allocator<T>>
 class vector {
 public:
+    typedef T value_type;
+    typedef Allocator allocator_type;
     typedef size_t size_type;
     typedef T& reference;
     typedef const T& const_reference;
@@ -27,7 +30,7 @@ public:
     vector() : _size(0), _capacity(0) { _data = new T[_capacity]; }
 
     vector(size_type count, const T& value = T()) : _size(count), _capacity(calculateGrowth(count)) {
-        _data = new T[_capacity];
+        _data = _allocator.allocate(_capacity);
         std::fill_n(_data, count, value);
     }
 
@@ -41,7 +44,7 @@ public:
     vector(const vector& other) {
         _size = other.size();
         _capacity = other.capacity();
-        _data = new T[_capacity];
+        _data = _allocator.allocate(_capacity);
 
         std::copy(other.begin(), other.end(), _data);
     }
@@ -54,7 +57,7 @@ public:
     vector(std::initializer_list<T> init) {
         _size = init.size();
         _capacity = calculateGrowth(_size);
-        _data = new T[_capacity];
+        _data = _allocator.allocate(_capacity);
 
         std::copy(init.begin(), init.end(), _data);
     }
@@ -62,7 +65,7 @@ public:
     ~vector() {
         // Make sure our data is not nullptr (used in unit tests to prevent double deconstruction)
         if (_data != nullptr) {
-            delete[] _data;
+            _allocator.destroy(_data);
             _data = nullptr;
         }
     }
@@ -70,8 +73,7 @@ public:
     vector& operator=(const vector& other) {
         _size = other.size();
         _capacity = other.capacity();
-        printf("other size: %d\n", other.size());
-        _data = new T[_capacity];
+        _data = _allocator.allocate(_capacity);
         
         std::copy(other.begin(), other.end(), _data);
         return *this;
@@ -80,7 +82,7 @@ public:
     void assign(size_t count, const T& value) {
         clear();
 
-        if (count > _capacity) {
+        if (count > capacity()) {
             reallocate(count);
         }
 
@@ -89,6 +91,10 @@ public:
         }
 
         _size = count;
+    }
+    
+    allocator_type get_allocator() const {
+        return _allocator;
     }
 
     /*
@@ -99,7 +105,7 @@ public:
     */
 
     reference at(size_type pos) {
-        if (pos < _size) {
+        if (pos < size() && pos >= 0) {
             return _data[pos];
         }
 
@@ -127,11 +133,11 @@ public:
     }
 
     reference back() {
-        return _data[_size - 1];
+        return _data[size() - 1];
     }
 
     const_reference back() const {
-        return _data[_size - 1];
+        return _data[size() - 1];
     }
 
     T* data() noexcept {
@@ -183,7 +189,7 @@ public:
     }
 
     bool empty() const {
-        return _size == 0;
+        return size() == 0;
     }
 
     size_type size() const {
@@ -207,14 +213,14 @@ public:
     }
 
     void shrink_to_fit() {
-        for (auto i = _size; i < _capacity; i++) {
+        for (auto i = size(); i < capacity(); i++) {
             _data[i].~T();
         }
-        _capacity = _size;
+        _capacity = size();
     }
 
     void clear() {
-        for (size_type i = 0; i < _size; i++) {
+        for (size_type i = 0; i < size(); i++) {
             _data[i].~T();
         }
 
@@ -256,11 +262,11 @@ public:
     }
 
     void push_back(const T& item) {
-        if (_size == _capacity) {
-            reallocate(_capacity + 1);
+        if (size() == capacity()) {
+            reallocate(capacity() + 1);
         }
 
-        _data[_size] = item;
+        _data[size()] = item;
         ++_size;
     }
 
@@ -293,13 +299,14 @@ private:
     size_type _size;
     size_type _capacity;
     T* _data;
+    Allocator _allocator;
 
     size_type calculateGrowth(size_type newSize) const {
-        if (_capacity > max_size() - _capacity / 2) {
+        if (capacity() > max_size() - capacity() / 2) {
             return newSize;
         }
 
-        const size_type geometric = _capacity * 1.5;
+        const size_type geometric = capacity() * 1.5;
 
         if (geometric < newSize) {
             return newSize;
@@ -311,9 +318,9 @@ private:
     void reallocate(size_type minSize) {
         const size_type newCapacity = calculateGrowth(minSize);
 
-        T* newData = new T[newCapacity];
+        T* newData = _allocator.allocate(newCapacity);
         std::copy(_data, _data + _size, newData);
-        delete[] _data;
+        _allocator.destroy(_data);
 
         _data = newData;
         _capacity = newCapacity;

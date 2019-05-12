@@ -1,7 +1,8 @@
 #include "gtest/gtest.h"
 #include "../src/vector.h"
+#include <vector>
 
-typedef vector<int> vint;
+typedef std::vector<int> vint;
 
 TEST(Constructor, Empty)
 {
@@ -82,13 +83,13 @@ TEST(Function, Assign)
 TEST(Access, At)
 {
     vint vec({ 1, 2, 3, 4 });
-
-    EXPECT_EQ(1, vec.at(0));
-    EXPECT_EQ(2, vec.at(1));
-    EXPECT_EQ(3, vec.at(2));
-    EXPECT_EQ(4, vec.at(3));
-
-    EXPECT_THROW(vec.at(4), std::out_of_range);
+    
+    EXPECT_EQ(vec.at(0), 1);
+    EXPECT_EQ(vec.at(1), 2);
+    EXPECT_EQ(vec.at(2), 3);
+    EXPECT_EQ(vec.at(3), 4);
+    
+    EXPECT_THROW(vec.at(10), std::out_of_range);
 }
 
 TEST(Access, OperatorArray)
