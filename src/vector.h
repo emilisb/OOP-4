@@ -293,9 +293,14 @@ public:
         ++_size;
     }
 
-    //void push_back(T&& value) {
-        // TODO
-    //}
+    void push_back(T&& value) {
+        if (size() == capacity()) {
+            reallocate(capacity() + 1);
+        }
+
+        _data[size()] = std::move(value);
+        ++_size;
+    }
 
     template< class... Args >
     void emplace_back(Args&&... args) {
@@ -328,7 +333,10 @@ public:
     }
 
     void swap(vector& other) {
-        // TODO
+        std::swap(_size, other._size);
+        std::swap(_capacity, other._capacity);
+        std::swap(_allocator, other._allocator);
+        std::swap(_data, other._data);
     }
 private:
     size_type _size;

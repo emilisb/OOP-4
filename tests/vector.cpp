@@ -197,6 +197,15 @@ TEST(Modifier, PushBack)
     EXPECT_EQ(9, vec.at(0));
 }
 
+TEST(Modifier, PushBackMove)
+{
+    vint vec;
+    int value = 5;
+    vec.push_back(std::move(value));
+
+    EXPECT_EQ(5, vec.at(0));
+}
+
 TEST(Capacity, Empty)
 {
     vint vec;
@@ -287,4 +296,22 @@ TEST(Modifier, ResizeWithValue)
     EXPECT_EQ(2, vec.size());
     EXPECT_EQ(1, vec.at(0));
     EXPECT_EQ(2, vec.at(1));
+}
+
+TEST(Modifier, Swap)
+{
+    vint vec({ 1, 2, 3, 4 });
+    vint other({ 10, 20, 30, 40, 50 });
+    vec.swap(other);
+
+    EXPECT_EQ(5, vec.size());
+    EXPECT_EQ(4, other.size());
+
+    for (int i = 0; i < 5; i++) {
+        EXPECT_EQ((i + 1) * 10, vec.at(i));
+    }
+
+    for (int i = 0; i < 4; i++) {
+        EXPECT_EQ(i + 1, other.at(i));
+    }
 }
