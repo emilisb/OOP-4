@@ -59,6 +59,10 @@ public:
         _data = _allocator.allocate(_capacity);
         std::move(other.begin(), other.end(), _data);
 
+        for (size_type i = 0; i < _size; i++) {
+            _data[i].~T();
+        }
+
         other.clear();
     }
 
@@ -73,6 +77,9 @@ public:
     ~vector() {
         // Make sure our data is not nullptr (used in unit tests to prevent double deconstruction)
         if (_data != nullptr) {
+            for (size_type i = 0; i < _size; i++) {
+                _data[i].~T();
+            }
             _allocator.destroy(_data);
             _data = nullptr;
         }
@@ -336,6 +343,9 @@ private:
 
         T* newData = _allocator.allocate(newCapacity);
         std::move(_data, _data + _size, newData);
+        for (size_type i = 0; i < _size; i++) {
+            _data[i].~T();
+        }
         _allocator.destroy(_data);
 
         _data = newData;
