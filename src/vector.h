@@ -34,12 +34,15 @@ public:
         std::fill_n(_data, count, value);
     }
 
-    /*
-     template<class InputIt>
-     vector(InputIt first, InputIt last) {
-     // TODO
-     }
-     */
+    vector(iterator first, iterator last) {
+        _size = last - first;
+        _capacity = last - first;
+        _data = _allocator.allocate(_capacity);
+
+        for (int i = 0; i < size(); i++) {
+            _data[i] = *(first + i);
+        }
+    }
 
     vector(const vector& other) {
         _size = other.size();
@@ -49,9 +52,14 @@ public:
         std::copy(other.begin(), other.end(), _data);
     }
 
-    // C++11
     vector(vector&& other) {
-        // TODO
+        _size = other.size();
+        _capacity = other.capacity();
+
+        _data = _allocator.allocate(_capacity);
+        std::move(other.begin(), other.end(), _data);
+
+        other.clear();
     }
 
     vector(std::initializer_list<T> init) {
@@ -74,7 +82,7 @@ public:
         _size = other.size();
         _capacity = other.capacity();
         _data = _allocator.allocate(_capacity);
-        
+
         std::copy(other.begin(), other.end(), _data);
         return *this;
     }
@@ -92,17 +100,26 @@ public:
 
         _size = count;
     }
-    
+
     allocator_type get_allocator() const {
         return _allocator;
     }
 
-    /*
-    template<class InputIt>
-    void assign(InputIt first, InputIt last) {
-        // TODO
+    void assign(iterator first, iterator last) {
+        clear();
+
+        const int count = last - first;
+        
+        if (count > capacity()) {
+            reallocate(count);
+        }
+
+        for (int i = 0; i < count; i++) {
+            _data[i] = *(first + i);
+        }
+
+        _size = count;
     }
-    */
 
     reference at(size_type pos) {
         if (pos < size() && pos >= 0) {
@@ -197,7 +214,6 @@ public:
     }
 
     size_type max_size() const {
-        // TODO verify
         return std::numeric_limits<size_type>::max();
     }
 
@@ -319,7 +335,7 @@ private:
         const size_type newCapacity = calculateGrowth(minSize);
 
         T* newData = _allocator.allocate(newCapacity);
-        std::copy(_data, _data + _size, newData);
+        std::move(_data, _data + _size, newData);
         _allocator.destroy(_data);
 
         _data = newData;

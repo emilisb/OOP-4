@@ -2,7 +2,7 @@
 #include "../src/vector.h"
 #include <vector>
 
-typedef std::vector<int> vint;
+typedef vector<int> vint;
 
 TEST(Constructor, Empty)
 {
@@ -23,6 +23,18 @@ TEST(Constructor, CountAndValue)
     }
 }
 
+TEST(Constructor, WithIterators)
+{
+    vint original({ 1, 2, 3, 4 });
+    vint copy(original.begin(), original.end());
+
+    EXPECT_EQ(4, copy.size());
+
+    for (int i = 0; i < 4; i++) {
+        EXPECT_EQ(original.at(i), copy.at(i));
+    }
+}
+
 TEST(Constructor, WithOtherVector)
 {
     vint original({ 1, 2, 3, 4 });
@@ -33,6 +45,20 @@ TEST(Constructor, WithOtherVector)
     for (int i = 0; i < 4; i++) {
         EXPECT_EQ(original.at(i), copy.at(i));
     }
+}
+
+TEST(Constructor, Move)
+{
+    vint original({ 1, 2, 3, 4 });
+    vint copy = std::move(original);
+
+    EXPECT_EQ(4, copy.size());
+    EXPECT_EQ(1, copy.at(0));
+    EXPECT_EQ(2, copy.at(1));
+    EXPECT_EQ(3, copy.at(2));
+    EXPECT_EQ(4, copy.at(3));
+
+    EXPECT_TRUE(original.empty());
 }
 
 TEST(Constructor, WithInitList)
@@ -78,6 +104,20 @@ TEST(Function, Assign)
     for (int i = 0; i < vec.size(); i++) {
         EXPECT_EQ(value, vec.at(i));
     }
+}
+
+TEST(Function, AssignWithIterator)
+{
+    vint original({ 10, 20, 30, 40, 50 });
+    vint vec({ 1, 2, 3, 4 });
+    vec.assign(original.begin(), original.end());
+
+    EXPECT_EQ(5, vec.size());
+    EXPECT_EQ(10, vec.at(0));
+    EXPECT_EQ(20, vec.at(1));
+    EXPECT_EQ(30, vec.at(2));
+    EXPECT_EQ(40, vec.at(3));
+    EXPECT_EQ(50, vec.at(4));
 }
 
 TEST(Access, At)
