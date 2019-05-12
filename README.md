@@ -24,6 +24,7 @@ STD vector: << 869 ms
 ```
 
 ## Reallocation benchmark
+(This vector is using same growth method as g++ std::vector)
 ```
 Benchmark: reallocations inserting 10000 elements
 My vector: << 23
