@@ -14,21 +14,22 @@
 class TestObject {
 public:
     TestObject() {
-        // std::cout << "object constructor" << std::endl;
+        std::cout << "object constructor" << std::endl;
         ptr = &_value;
     }
     
     TestObject(const TestObject& other) {
-        // std::cout << "object copy constructor" << std::endl;
+        std::cout << "object copy constructor" << std::endl;
         ptr = &_value;
     }
     
     TestObject(int value) : _value(value) {
-        // std::cout << "object constructor with value" << std::endl;
+        std::cout << "object constructor with value" << std::endl;
+        ptr = &_value;
     }
     
     ~TestObject() {
-        // std::cout << "object deconstructor" << std::endl;
+        std::cout << "object deconstructor" << std::endl;
     }
     
     int *ptr;
@@ -94,17 +95,23 @@ void benchmarkResize(size_t size) {
 
 int main(int argc, const char * argv[]) {
     for (size_t i = 10000; i <= 100000000; i *= 10) {
-        benchmarkInsert(i);
-        benchmarkResize(i);
+        //benchmarkInsert(i);
+        //benchmarkResize(i);
     }
 
     vector<TestObject> numbers;
     
-    TestObject object;
+    {
+        TestObject object(5);
+        for (int i = 0; i < 10; i++) {
+            numbers.push_back(object);
+            // std::cout << "capacity " << numbers.capacity() << " size " << numbers.size() << std::endl;
+            std::cout << "pointer addr " << numbers.at(i).ptr << " value " << *numbers.at(i).ptr << std::endl;
+        }
+    }
+    
     for (int i = 0; i < 10; i++) {
-        numbers.push_back(object);
-        // std::cout << "capacity " << numbers.capacity() << " size " << numbers.size() << std::endl;
-        // std::cout << "pointer addr " << numbers.at(i).ptr << " value " << *numbers.at(i).ptr << std::endl;
+        std::cout << "pointer addr " << numbers.at(i).ptr << " value " << *numbers.at(i).ptr << std::endl;
     }
 
     std::cout << numbers.size() << std::endl;

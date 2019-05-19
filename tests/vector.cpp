@@ -189,6 +189,27 @@ TEST(Iterators, Rend)
     EXPECT_EQ(1, *(vec.rend() - 1));
 }
 
+TEST(Modifier, Erase)
+{
+    vint vec({ 1, 2, 3, 4 });
+    vec.erase(vec.begin() + 1);
+    
+    EXPECT_EQ(vec.size(), 3);
+    EXPECT_EQ(vec.at(0), 1);
+    EXPECT_EQ(vec.at(1), 3);
+    EXPECT_EQ(vec.at(2), 4);
+}
+
+TEST(Modifier, EraseWithRange)
+{
+    vint vec({ 1, 2, 3, 4 });
+    vec.erase(vec.begin() + 1, vec.begin() + 3);
+    
+    EXPECT_EQ(vec.size(), 2);
+    EXPECT_EQ(vec.at(0), 1);
+    EXPECT_EQ(vec.at(1), 4);
+}
+
 TEST(Modifier, PushBack)
 {
     vint vec;

@@ -27,7 +27,9 @@ public:
     typedef std::reverse_iterator<iterator> reverse_iterator;
     typedef std::reverse_iterator<const_iterator> const_reverse_iterator;
 
-    vector() : _size(0), _capacity(0) { _data = new T[_capacity]; }
+    vector() : _size(0), _capacity(0) {
+        _data = _allocator.allocate(_capacity);
+    }
 
     vector(size_type count, const T& value = T()) : _size(count), _capacity(calculateGrowth(count)) {
         _data = _allocator.allocate(_capacity);
@@ -39,9 +41,7 @@ public:
         _capacity = last - first;
         _data = _allocator.allocate(_capacity);
 
-        for (int i = 0; i < size(); i++) {
-            _data[i] = *(first + i);
-        }
+        std::copy(first, last, _data);
     }
 
     vector(const vector& other) {
@@ -59,10 +59,6 @@ public:
         _data = _allocator.allocate(_capacity);
         std::move(other.begin(), other.end(), _data);
 
-        for (size_type i = 0; i < _size; i++) {
-            _data[i].~T();
-        }
-
         other.clear();
     }
 
@@ -77,10 +73,10 @@ public:
     ~vector() {
         // Make sure our data is not nullptr (used in unit tests to prevent double deconstruction)
         if (_data != nullptr) {
-            for (size_type i = 0; i < _size; i++) {
-                _data[i].~T();
+            for (size_type i = 0; i < size(); i++) {
+                _allocator.destroy(begin() + i);
             }
-            _allocator.destroy(_data);
+            _allocator.deallocate(_data, size());
             _data = nullptr;
         }
     }
@@ -121,9 +117,7 @@ public:
             reallocate(count);
         }
 
-        for (int i = 0; i < count; i++) {
-            _data[i] = *(first + i);
-        }
+        std::copy(first, last, _data);
 
         _size = count;
     }
@@ -228,6 +222,11 @@ public:
         if (new_cap > max_size()) {
             throw new std::length_error("capacity cannot be larger than max size");
         }
+        
+        if (new_cap > capacity()) {
+            reallocate(capacity() + new_cap);
+        }
+        
         _capacity = new_cap;
     }
 
@@ -237,14 +236,14 @@ public:
 
     void shrink_to_fit() {
         for (auto i = size(); i < capacity(); i++) {
-            _data[i].~T();
+            _allocator.destroy(data() + i);
         }
         _capacity = size();
     }
 
     void clear() {
         for (size_type i = 0; i < size(); i++) {
-            _data[i].~T();
+            _allocator.destroy(data() + i);
         }
 
         _size = 0;
@@ -274,7 +273,7 @@ public:
     iterator insert(const_iterator pos, size_type count, const T& value) {
         auto index = pos - begin();
 
-        if (size() == capacity()) {
+        if (size() + count > capacity()) {
             reallocate(capacity() + count);
         }
 
@@ -304,11 +303,32 @@ public:
     }
 
     iterator erase(const_iterator pos) {
-        // TODO
+        auto index = pos - begin();
+        _data[index].~T();
+        
+        for (auto i = index; i < size() - 1; i++) {
+            _data[i] = std::move(_data[i + 1]);
+        }
+        
+        _size--;
+        iterator it = &_data[index];
+        
+        return it;
     }
 
     iterator erase(const_iterator first, const_iterator last) {
-        // TODO
+        auto startIndex = first - begin();
+        auto endIndex = last - begin();
+        
+        for (auto i = 0; i < endIndex - startIndex; i++) {
+            _allocator.destroy(data() + startIndex + i);
+            _data[startIndex + i] = std::move(_data[endIndex + i]);
+        }
+        
+        _size -= endIndex - startIndex;
+        iterator it = &_data[startIndex];
+        
+        return it;
     }
 
     void push_back(const T& item) {
@@ -316,7 +336,7 @@ public:
             reallocate(capacity() + 1);
         }
 
-        _data[size()] = item;
+        _allocator.construct(end(), item);
         ++_size;
     }
 
@@ -335,7 +355,7 @@ public:
     }
 
     void pop_back() {
-        back().~T();
+        _allocator.destroy(end() - 1);
         --_size;
     }
 
@@ -347,12 +367,12 @@ public:
         if (count > capacity()) {
             reallocate(count);
             for (size_type i = size(); i < count; i++) {
-                _data[i] = value;
+                _allocator.construct(data() + i, value);
             }
         }
         else if (count < size()) {
             for (size_type i = count; i < size(); i++) {
-                _data[i].~T();
+                _allocator.destroy(data() + i);
             }
         }
 
@@ -391,9 +411,9 @@ private:
         T* newData = _allocator.allocate(newCapacity);
         std::move(_data, _data + _size, newData);
         for (size_type i = 0; i < _size; i++) {
-            _data[i].~T();
+            _allocator.destroy(data() + i);
         }
-        _allocator.destroy(_data);
+        _allocator.deallocate(_data, size());
 
         _data = newData;
         _capacity = newCapacity;
