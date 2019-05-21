@@ -11,30 +11,28 @@
 #include "vector.h"
 #include "timer/Timer.h"
 
+#include <string>
+
 class TestObject {
 public:
     TestObject() {
         std::cout << "object constructor" << std::endl;
-        ptr = &_value;
     }
-    
+    /*
     TestObject(const TestObject& other) {
         std::cout << "object copy constructor" << std::endl;
-        ptr = &_value;
     }
+     */
     
-    TestObject(int value) : _value(value) {
+    TestObject(std::string value) : _value(value) {
         std::cout << "object constructor with value" << std::endl;
-        ptr = &_value;
     }
     
     ~TestObject() {
         std::cout << "object deconstructor" << std::endl;
     }
-    
-    int *ptr;
-private:
-    int _value = 10;
+
+    std::string _value;
 };
 
 void benchmarkInsert(size_t size) {
@@ -94,6 +92,52 @@ void benchmarkResize(size_t size) {
 }
 
 int main(int argc, const char * argv[]) {
+    /*
+    std::allocator<std::string> allocator;
+    std::string *array;
+    
+    array = allocator.allocate(0);
+    allocator.deallocate(array, 0);
+    
+    array = allocator.allocate(3);
+    allocator.construct(&array[0], "hello");
+    allocator.construct(&array[1], "world");
+    allocator.construct(&array[2], "test");
+    
+    std::cout << allocator.max_size() << std::endl;
+    
+    for (int i = 0; i < 3; i++) {
+        std::cout << array[i] << " ";
+    }
+    
+    std::cout << std::endl;
+    
+    std::cout << *(array) << " ";
+    std::cout << *(array + 1) << " ";
+    std::cout << *(array + 2) << " ";
+    
+    return 0;
+    
+    std::string *newArray;
+    newArray = allocator.allocate(5);
+    std::move(array, array + 3, newArray);
+    
+    return 0;
+     */
+    /*
+    vector<std::string> students;
+    int n = 200000;
+    for (int i = 0; i < n; i++) {
+        students.push_back("helllo");
+        std::cout << students.at(i) << std::endl;
+    }
+    
+    for (int i = 0; i < n; i++) {
+        std::cout << students.at(i) << std::endl;
+    }
+    
+    return 0;
+    */
     for (size_t i = 10000; i <= 100000000; i *= 10) {
         //benchmarkInsert(i);
         //benchmarkResize(i);
@@ -101,17 +145,15 @@ int main(int argc, const char * argv[]) {
 
     vector<TestObject> numbers;
     
-    {
-        TestObject object(5);
-        for (int i = 0; i < 10; i++) {
-            numbers.push_back(object);
-            // std::cout << "capacity " << numbers.capacity() << " size " << numbers.size() << std::endl;
-            std::cout << "pointer addr " << numbers.at(i).ptr << " value " << *numbers.at(i).ptr << std::endl;
-        }
+    TestObject object("hello");
+    for (int i = 0; i < 10; i++) {
+        numbers.push_back(object);
     }
     
-    for (int i = 0; i < 10; i++) {
-        std::cout << "pointer addr " << numbers.at(i).ptr << " value " << *numbers.at(i).ptr << std::endl;
+    numbers.erase(numbers.begin(), numbers.begin() + 1);
+    
+    for (int i = 0; i < numbers.size(); i++) {
+        std::cout << numbers.at(i)._value << std::endl;
     }
 
     std::cout << numbers.size() << std::endl;

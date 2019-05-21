@@ -74,9 +74,9 @@ public:
         // Make sure our data is not nullptr (used in unit tests to prevent double deconstruction)
         if (_data != nullptr) {
             for (size_type i = 0; i < size(); i++) {
-                _allocator.destroy(begin() + i);
+                _allocator.destroy(&_data[i]);
             }
-            _allocator.deallocate(_data, size());
+            _allocator.deallocate(_data, capacity());
             _data = nullptr;
         }
     }
@@ -307,7 +307,8 @@ public:
         _data[index].~T();
         
         for (auto i = index; i < size() - 1; i++) {
-            _data[i] = std::move(_data[i + 1]);
+            _allocator.destroy(&_data[i + 1]);
+            _allocator.construct(&_data[i], _data[i + 1]);
         }
         
         _size--;
@@ -321,8 +322,8 @@ public:
         auto endIndex = last - begin();
         
         for (auto i = 0; i < endIndex - startIndex; i++) {
-            _allocator.destroy(data() + startIndex + i);
-            _data[startIndex + i] = std::move(_data[endIndex + i]);
+            _allocator.destroy(&_data[startIndex + i]);
+            _allocator.construct(&_data[startIndex + i], _data[endIndex + i]);
         }
         
         _size -= endIndex - startIndex;
@@ -335,7 +336,6 @@ public:
         if (size() == capacity()) {
             reallocate(capacity() + 1);
         }
-
         _allocator.construct(end(), item);
         ++_size;
     }
@@ -345,7 +345,7 @@ public:
             reallocate(capacity() + 1);
         }
 
-        _data[size()] = std::move(value);
+        _allocator.construct(end(), std::move(value));
         ++_size;
     }
 
@@ -409,11 +409,12 @@ private:
         const size_type newCapacity = calculateGrowth(minSize);
 
         T* newData = _allocator.allocate(newCapacity);
-        std::move(_data, _data + _size, newData);
+        // std::move(_data, _data + _size, newData);
         for (size_type i = 0; i < _size; i++) {
-            _allocator.destroy(data() + i);
+            _allocator.construct(&newData[i], std::move(_data[i]));
+            _allocator.destroy(&_data[i]);
         }
-        _allocator.deallocate(_data, size());
+        _allocator.deallocate(_data, capacity());
 
         _data = newData;
         _capacity = newCapacity;
