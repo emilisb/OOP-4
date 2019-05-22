@@ -92,75 +92,9 @@ void benchmarkResize(size_t size) {
 }
 
 int main(int argc, const char * argv[]) {
-    vector<int> vec({ 1, 2, 3, 4 });
-    vector<int> other({ 1, 2, 3, 4 });
-    
-    if (vec == other) {
-        return 1;
-    }
-    
-    return 0;
-    
-    struct T {
-        int a;
-        double b;
-        std::string c;
-        
-        T(int a, double b, std::string &&c) : a(a) , b(b), c(std::move(c)) {}
-    };
-    
-    vector<T> objects;
-    objects.emplace(objects.begin(), 42, 3.14, "foo");
-    std::cout << objects.at(0).a << std::endl;
-    /*
-    std::allocator<std::string> allocator;
-    std::string *array;
-    
-    array = allocator.allocate(0);
-    allocator.deallocate(array, 0);
-    
-    array = allocator.allocate(3);
-    allocator.construct(&array[0], "hello");
-    allocator.construct(&array[1], "world");
-    allocator.construct(&array[2], "test");
-    
-    std::cout << allocator.max_size() << std::endl;
-    
-    for (int i = 0; i < 3; i++) {
-        std::cout << array[i] << " ";
-    }
-    
-    std::cout << std::endl;
-    
-    std::cout << *(array) << " ";
-    std::cout << *(array + 1) << " ";
-    std::cout << *(array + 2) << " ";
-    
-    return 0;
-    
-    std::string *newArray;
-    newArray = allocator.allocate(5);
-    std::move(array, array + 3, newArray);
-    
-    return 0;
-     */
-    /*
-    vector<std::string> students;
-    int n = 200000;
-    for (int i = 0; i < n; i++) {
-        students.push_back("helllo");
-        std::cout << students.at(i) << std::endl;
-    }
-    
-    for (int i = 0; i < n; i++) {
-        std::cout << students.at(i) << std::endl;
-    }
-    
-    return 0;
-    */
     for (size_t i = 10000; i <= 100000000; i *= 10) {
-        //benchmarkInsert(i);
-        //benchmarkResize(i);
+        benchmarkInsert(i);
+        benchmarkResize(i);
     }
 
     vector<TestObject> numbers;

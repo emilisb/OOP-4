@@ -1,6 +1,5 @@
 #include "gtest/gtest.h"
 #include "../src/vector.h"
-#include <vector>
 
 typedef vector<int> vint;
 
