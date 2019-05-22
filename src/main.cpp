@@ -92,6 +92,17 @@ void benchmarkResize(size_t size) {
 }
 
 int main(int argc, const char * argv[]) {
+    struct T {
+        int a;
+        double b;
+        std::string c;
+        
+        T(int a, double b, std::string &&c) : a(a) , b(b), c(std::move(c)) {}
+    };
+    
+    vector<T> objects;
+    objects.emplace(objects.begin(), 42, 3.14, "foo");
+    std::cout << objects.at(0).a << std::endl;
     /*
     std::allocator<std::string> allocator;
     std::string *array;

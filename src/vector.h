@@ -162,11 +162,11 @@ public:
     }
 
     T* data() noexcept {
-        return _allocator.address(_data);
+        return _data;
     }
 
     const T* data() const noexcept {
-        return _allocator.address(_data);
+        return _data;
     }
 
     iterator begin() noexcept {

@@ -2,7 +2,7 @@
 #include "../src/vector.h"
 #include <vector>
 
-typedef std::vector<int> vint;
+typedef vector<int> vint;
 
 TEST(Constructor, Empty)
 {
