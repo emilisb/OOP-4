@@ -92,6 +92,15 @@ void benchmarkResize(size_t size) {
 }
 
 int main(int argc, const char * argv[]) {
+    vector<int> vec({ 1, 2, 3, 4 });
+    vector<int> other({ 1, 2, 3, 4 });
+    
+    if (vec == other) {
+        return 1;
+    }
+    
+    return 0;
+    
     struct T {
         int a;
         double b;

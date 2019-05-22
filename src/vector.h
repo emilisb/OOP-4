@@ -13,6 +13,7 @@
 #include <stdexcept>
 #include <iterator>
 #include <limits>
+#include <algorithm>
 
 template<class T, class Allocator = std::allocator<T>>
 class vector {
@@ -134,7 +135,11 @@ public:
     }
 
     const_reference at(size_type pos) const {
-        return at(pos);
+        if (pos < size() && pos >= 0) {
+            return _data[pos];
+        }
+        
+        throw std::out_of_range("position is out of range");
     }
 
     reference operator[](size_type pos) {
@@ -414,8 +419,8 @@ public:
         std::swap(_data, other._data);
     }
 private:
-    size_type _size;
-    size_type _capacity;
+    size_type _size = 0;
+    size_type _capacity = 0;
     T* _data;
     Allocator _allocator;
 
@@ -448,5 +453,45 @@ private:
         _capacity = newCapacity;
     }
 };
+
+template< class T, class Alloc>
+bool operator==(const vector<T, Alloc>& lhs, const vector<T, Alloc>& rhs) {
+    if (lhs.size() != rhs.size()) {
+        return false;
+    }
+    
+    for (int i = 0; i < lhs.size(); i++) {
+        if (lhs.at(i) != rhs.at(i)) {
+            return false;
+        }
+    }
+    
+    return true;
+}
+
+template< class T, class Alloc>
+bool operator!=(const vector<T, Alloc>& lhs, const vector<T, Alloc>& rhs) {
+    return !(lhs == rhs);
+}
+
+template< class T, class Alloc>
+bool operator<(const vector<T, Alloc>& lhs, const vector<T, Alloc>& rhs) {
+    return std::lexicographical_compare(lhs.begin(), lhs.end(), rhs.begin(), rhs.end());
+}
+
+template< class T, class Alloc>
+bool operator>(const vector<T, Alloc>& lhs, const vector<T, Alloc>& rhs) {
+    return rhs < lhs;
+}
+
+template< class T, class Alloc>
+bool operator<=(const vector<T, Alloc>& lhs, const vector<T, Alloc>& rhs) {
+    return !(rhs < lhs);
+}
+
+template< class T, class Alloc>
+bool operator>=(const vector<T, Alloc>& lhs, const vector<T, Alloc>& rhs) {
+    return !(lhs < rhs);
+}
 
 #endif /* vector_h */

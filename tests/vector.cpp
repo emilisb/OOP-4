@@ -425,3 +425,63 @@ TEST(Modifier, Swap)
         EXPECT_EQ(i + 1, other.at(i));
     }
 }
+
+TEST(Operator, Equal)
+{
+    vint vec({ 1, 2, 3, 4 });
+    vint other({ 1, 2, 3, 4 });
+    vint different({ 1, 2, 3, 5 });
+    
+    EXPECT_TRUE(vec == other);
+    EXPECT_FALSE(vec == different);
+}
+
+TEST(Operator, NotEqual)
+{
+    vint vec({ 1, 2, 3, 4 });
+    vint other({ 1, 2, 3, 4 });
+    vint different({ 1, 2, 3, 5 });
+    
+    EXPECT_FALSE(vec != other);
+    EXPECT_TRUE(vec != different);
+}
+
+TEST(Operator, Less)
+{
+    vint vec({ 1, 2, 3, 4 });
+    vint other({ 1, 2, 3, 4 });
+    vint different({ 1, 3, 3, 4 });
+    
+    EXPECT_FALSE(vec < other);
+    EXPECT_TRUE(vec < different);
+}
+
+TEST(Operator, More)
+{
+    vint vec({ 1, 2, 3, 4 });
+    vint other({ 1, 2, 3, 4 });
+    vint different({ 1, 3, 3, 4 });
+    
+    EXPECT_FALSE(vec > other);
+    EXPECT_FALSE(vec > different);
+}
+
+TEST(Operator, LessOrEqual)
+{
+    vint vec({ 1, 2, 3, 4 });
+    vint other({ 1, 2, 3, 4 });
+    vint different({ 1, 3, 3, 4 });
+    
+    EXPECT_TRUE(vec <= other);
+    EXPECT_TRUE(vec <= different);
+}
+
+TEST(Operator, MoreOrEqual)
+{
+    vint vec({ 1, 2, 3, 4 });
+    vint other({ 1, 2, 3, 4 });
+    vint different({ 1, 3, 3, 4 });
+    
+    EXPECT_TRUE(vec >= other);
+    EXPECT_FALSE(vec >= different);
+}
