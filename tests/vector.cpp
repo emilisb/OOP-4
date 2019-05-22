@@ -2,7 +2,7 @@
 #include "../src/vector.h"
 #include <vector>
 
-typedef vector<int> vint;
+typedef std::vector<int> vint;
 
 TEST(Constructor, Empty)
 {
@@ -227,6 +227,25 @@ TEST(Modifier, PushBackMove)
     EXPECT_EQ(5, vec.at(0));
 }
 
+TEST(Modifier, EmplaceBack)
+{
+    struct T {
+        int a;
+        double b;
+        std::string c;
+        
+        T(int a, double b, std::string &&c) : a(a) , b(b), c(std::move(c)) {}
+    };
+    
+    vector<T> objects;
+    objects.emplace_back(42, 3.14, "foo");
+    
+    EXPECT_EQ(1, objects.size());
+    EXPECT_EQ(42, objects.at(0).a);
+    EXPECT_EQ(3.14, objects.at(0).b);
+    EXPECT_EQ("foo", objects.at(0).c);
+}
+
 TEST(Capacity, Empty)
 {
     vint vec;
@@ -315,6 +334,25 @@ TEST(Modifier, InsertWithCount)
     EXPECT_EQ(2, vec.at(4));
     EXPECT_EQ(3, vec.at(5));
     EXPECT_EQ(4, vec.at(6));
+}
+
+TEST(Modifier, Emplace)
+{
+    struct T {
+        int a;
+        double b;
+        std::string c;
+        
+        T(int a, double b, std::string &&c) : a(a) , b(b), c(std::move(c)) {}
+    };
+    
+    vector<T> objects;
+    objects.emplace(objects.begin(), 42, 3.14, "foo");
+    
+    EXPECT_EQ(1, objects.size());
+    EXPECT_EQ(42, objects.at(0).a);
+    EXPECT_EQ(3.14, objects.at(0).b);
+    EXPECT_EQ("foo", objects.at(0).c);
 }
 
 TEST(Modifier, PopBack)

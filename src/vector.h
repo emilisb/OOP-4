@@ -20,8 +20,11 @@ public:
     typedef T value_type;
     typedef Allocator allocator_type;
     typedef size_t size_type;
+    typedef std::ptrdiff_t difference_type;
     typedef T& reference;
     typedef const T& const_reference;
+    typedef T* pointer;
+    typedef const T* const_pointer;
     typedef T* iterator;
     typedef const T* const_iterator;
     typedef std::reverse_iterator<iterator> reverse_iterator;
@@ -159,11 +162,11 @@ public:
     }
 
     T* data() noexcept {
-        return _data;
+        return _allocator.address(_data);
     }
 
     const T* data() const noexcept {
-        return _data;
+        return _allocator.address(_data);
     }
 
     iterator begin() noexcept {
@@ -179,11 +182,11 @@ public:
     }
 
     iterator end() noexcept {
-        return _data + _size;
+        return begin() + _size;
     }
 
     const_iterator end() const noexcept {
-        return _data + _size;
+        return begin() + _size;
     }
 
     const_iterator cend() const noexcept {
@@ -254,7 +257,11 @@ public:
     }
 
     iterator insert(const_iterator pos, T&& value) {
-        auto index = pos - begin();
+        difference_type index = pos - begin();
+        
+        if (index < 0 || index > size()) {
+            throw new std::out_of_range("Insert index is out of range");
+        }
 
         if (size() == capacity()) {
             reallocate(capacity() + 1);
@@ -271,7 +278,11 @@ public:
     }
 
     iterator insert(const_iterator pos, size_type count, const T& value) {
-        auto index = pos - begin();
+        difference_type index = pos - begin();
+        
+        if (index < 0 || index > size()) {
+            throw new std::out_of_range("Insert index is out of range");
+        }
 
         if (size() + count > capacity()) {
             reallocate(capacity() + count);
@@ -299,11 +310,28 @@ public:
 
     template< class... Args >
     iterator emplace(const_iterator pos, Args&&... args) {
-        // TODO
+        difference_type index = pos - begin();
+        
+        if (index < 0 || index > size()) {
+            throw new std::out_of_range("Insert index is out of range");
+        }
+        
+        if (size() == capacity()) {
+            reallocate(capacity() + 1);
+        }
+        
+        iterator it = &_data[index];
+        
+        std::move(it, end(), it + 1);
+        _allocator.construct(it, args...);
+        
+        _size++;
+        
+        return it;
     }
 
     iterator erase(const_iterator pos) {
-        auto index = pos - begin();
+        difference_type index = pos - begin();
         _data[index].~T();
         
         for (auto i = index; i < size() - 1; i++) {
@@ -318,10 +346,10 @@ public:
     }
 
     iterator erase(const_iterator first, const_iterator last) {
-        auto startIndex = first - begin();
-        auto endIndex = last - begin();
+        difference_type startIndex = first - begin();
+        difference_type endIndex = last - begin();
         
-        for (auto i = 0; i < endIndex - startIndex; i++) {
+        for (difference_type i = 0; i < endIndex - startIndex; i++) {
             _allocator.destroy(&_data[startIndex + i]);
             _allocator.construct(&_data[startIndex + i], _data[endIndex + i]);
         }
@@ -351,7 +379,7 @@ public:
 
     template< class... Args >
     void emplace_back(Args&&... args) {
-        // TODO
+        emplace(end(), std::forward<Args>(args)...);
     }
 
     void pop_back() {
