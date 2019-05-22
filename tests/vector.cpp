@@ -1,5 +1,6 @@
 #include "gtest/gtest.h"
 #include "../src/vector.h"
+#include <vector>
 
 typedef vector<int> vint;
 
@@ -333,6 +334,38 @@ TEST(Modifier, InsertWithCount)
     EXPECT_EQ(2, vec.at(4));
     EXPECT_EQ(3, vec.at(5));
     EXPECT_EQ(4, vec.at(6));
+}
+
+TEST(Modifier, InsertWithIterators)
+{
+    vint vec({ 1, 2, 3, 4 });
+    vint other({ 10, 20, 30, 40 });
+    
+    int results[6] = { 1, 2, 20, 30, 3, 4 };
+    
+    auto it = vec.insert(vec.begin() + 2, other.begin() + 1, other.begin() + 3);
+    EXPECT_EQ(6, vec.size());
+    EXPECT_EQ(20, *it);
+    
+    for (int i = 0; i < 6; i++) {
+        EXPECT_EQ(vec.at(i), results[i]);
+    }
+}
+
+TEST(Modifier, InsertWithInitList)
+{
+    vint vec({ 1, 2, 3, 4 });
+    std::initializer_list<int> list({ 20, 30 });
+    
+    int results[6] = { 1, 2, 20, 30, 3, 4 };
+    
+    auto it = vec.insert(vec.begin() + 2, list);
+    EXPECT_EQ(6, vec.size());
+    EXPECT_EQ(20, *it);
+    
+    for (int i = 0; i < 6; i++) {
+        EXPECT_EQ(vec.at(i), results[i]);
+    }
 }
 
 TEST(Modifier, Emplace)

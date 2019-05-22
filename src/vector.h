@@ -115,7 +115,7 @@ public:
     void assign(iterator first, iterator last) {
         clear();
 
-        const int count = last - first;
+        const difference_type count = last - first;
         
         if (count > capacity()) {
             reallocate(count);
@@ -283,7 +283,7 @@ public:
     }
 
     iterator insert(const_iterator pos, size_type count, const T& value) {
-        difference_type index = pos - begin();
+        const difference_type index = pos - begin();
         
         if (index < 0 || index > size()) {
             throw new std::out_of_range("Insert index is out of range");
@@ -296,9 +296,7 @@ public:
         iterator it = &_data[index];
 
         std::move(it, end(), it + count);
-        for (int i = 0; i < count; i++) {
-            *(it + i) = value;
-        }
+        std::fill_n(it, count, value);
 
         _size += count;
 
@@ -306,16 +304,42 @@ public:
     }
 
     iterator insert(const_iterator pos, iterator first, iterator last) {
-        // TODO
+        const difference_type count = last - first;
+        const difference_type index = pos - begin();
+        
+        if (size() + count > capacity()) {
+            reallocate(capacity() + count);
+        }
+        
+        iterator it = &_data[index];
+        std::move(it, end(), it + count);
+        std::copy(first, last, it);
+        
+        _size += count;
+        
+        return it;
     }
 
     iterator insert(const_iterator pos, std::initializer_list<T> ilist) {
-        // TODO
+        const difference_type count = ilist.size();
+        const difference_type index = pos - begin();
+        
+        if (size() + count > capacity()) {
+            reallocate(capacity() + count);
+        }
+        
+        iterator it = &_data[index];
+        std::move(it, end(), it + count);
+        std::copy(ilist.begin(), ilist.end(), it);
+        
+        _size += count;
+        
+        return it;
     }
 
     template< class... Args >
     iterator emplace(const_iterator pos, Args&&... args) {
-        difference_type index = pos - begin();
+        const difference_type index = pos - begin();
         
         if (index < 0 || index > size()) {
             throw new std::out_of_range("Insert index is out of range");
@@ -336,8 +360,8 @@ public:
     }
 
     iterator erase(const_iterator pos) {
-        difference_type index = pos - begin();
-        _data[index].~T();
+        const difference_type index = pos - begin();
+        _allocator.destroy(&_data[index]);
         
         for (auto i = index; i < size() - 1; i++) {
             _allocator.destroy(&_data[i + 1]);
@@ -351,8 +375,8 @@ public:
     }
 
     iterator erase(const_iterator first, const_iterator last) {
-        difference_type startIndex = first - begin();
-        difference_type endIndex = last - begin();
+        const difference_type startIndex = first - begin();
+        const difference_type endIndex = last - begin();
         
         for (difference_type i = 0; i < endIndex - startIndex; i++) {
             _allocator.destroy(&_data[startIndex + i]);
@@ -442,7 +466,6 @@ private:
         const size_type newCapacity = calculateGrowth(minSize);
 
         T* newData = _allocator.allocate(newCapacity);
-        // std::move(_data, _data + _size, newData);
         for (size_type i = 0; i < _size; i++) {
             _allocator.construct(&newData[i], std::move(_data[i]));
             _allocator.destroy(&_data[i]);
